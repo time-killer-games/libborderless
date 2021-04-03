@@ -48,31 +48,31 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
     (GetWindowLongPtr(w, GWL_STYLE) & WS_POPUP) != WS_POPUP) {
     if (dwid.find(w) != dwid.end() && dhgt.find(w) != dhgt.end() && fxd.find(w) != fxd.end()) {
       dwid.insert(std::make_pair(w, (rw.right - rw.left) - rc.right));
-	  dhgt.insert(std::make_pair(w, (rw.bottom - rw.top) - rc.bottom));
-	  fxd.insert(std::make_pair(w, (GetWindowLongPtr(w, GWL_STYLE) & WS_SIZEBOX) != WS_SIZEBOX));
+      dhgt.insert(std::make_pair(w, (rw.bottom - rw.top) - rc.bottom));
+      fxd.insert(std::make_pair(w, (GetWindowLongPtr(w, GWL_STYLE) & WS_SIZEBOX) != WS_SIZEBOX));
       fxd.insert(std::make_pair(w, (GetWindowLongPtr(w, GWL_STYLE) & WS_MAXIMIZEBOX) != WS_MAXIMIZEBOX));
     } else {
       dwid[w] = (rw.right - rw.left) - rc.right;
-	  dhgt[w] = (rw.bottom - rw.top) - rc.bottom;
+      dhgt[w] = (rw.bottom - rw.top) - rc.bottom;
       fxd[w]  = ((GetWindowLongPtr(w, GWL_STYLE) & WS_SIZEBOX) != WS_SIZEBOX);
       mxm[w]  = ((GetWindowLongPtr(w, GWL_STYLE) & WS_MAXIMIZEBOX) != WS_MAXIMIZEBOX);
     }
-	if (!IsZoomed(w)) {
+    if (!IsZoomed(w)) {
       MoveWindow(w, rw.left, rw.top, rc.right, rc.bottom, true);
-	}
+    }
     SetWindowLongPtr(w, GWL_STYLE, (GetWindowLongPtr(w, GWL_STYLE) | WS_POPUP) & ~WS_OVERLAPPEDWINDOW);
   } else if ((GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW) != WS_OVERLAPPEDWINDOW &&
     (GetWindowLongPtr(w, GWL_STYLE) & WS_POPUP)) {
     SetWindowLongPtr(w, GWL_STYLE, (GetWindowLongPtr(w, GWL_STYLE) | WS_OVERLAPPEDWINDOW) & ~WS_POPUP);
-	if (fxd[w]) {
+    if (fxd[w]) {
       SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) & ~WS_SIZEBOX);
     } else {
       SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) | WS_SIZEBOX);
     }
-	if (mxm[w]) {
-	  SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) & ~WS_MAXIMIZEBOX);
+    if (mxm[w]) {
+      SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) & ~WS_MAXIMIZEBOX);
     } else {
-	  SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) | WS_MAXIMIZEBOX);
+      SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) | WS_MAXIMIZEBOX);
     }
     MoveWindow(w, rw.left, rw.top, (rw.right - rw.left) + dwid[w], (rw.bottom - rw.top) + dhgt[w], true);
   }
