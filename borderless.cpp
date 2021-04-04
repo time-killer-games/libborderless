@@ -56,12 +56,12 @@ EXPORTED_FUNCTION double window_get_showborder(void *window) {
   int format;
   unsigned long bytes;
   unsigned long items;
-  unsigned char *data = NULL;
+  unsigned char *data = nullptr;
   bool ret = true;
-  Display *d = XOpenDisplay(NULL);
+  Display *d = XOpenDisplay(nullptr);
   Window w = (Window)(std::intptr_t)window;
-  Atom property = XInternAtom(d, "_MOTIF_WM_HINTS", False);
-  if (XGetWindowProperty(d, w, property, 0, LONG_MAX, False, AnyPropertyType, 
+  Atom property = XInternAtom(d, "_MOTIF_WM_HINTS", false);
+  if (XGetWindowProperty(d, w, property, 0, LONG_MAX, false, AnyPropertyType, 
   &type, &format, &items, &bytes, &data) == Success && data != nullptr) {
     Hints *hints = (Hints *)data;
     ret = hints->decorations;
