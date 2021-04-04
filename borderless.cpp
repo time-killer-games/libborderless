@@ -32,19 +32,54 @@
 std::map<HWND, int> dwid;
 std::map<HWND, int> dhgt;
 std::map<HWND, bool> fxd;
-std::map<HWND, bool> mxm;
+std::map<HWND, bool> nmx;
 #else
 #include <cstdint>
 #include <X11/Xlib.h>
 #define EXPORTED_FUNCTION extern "C" __attribute__((visibility("default")))
+typedef struct {
+  unsigned long flags;
+  unsigned long functions;
+  unsigned long decorations;
+  long inputMode;
+  unsigned long status;
+} Hints;
 #endif
+
+EXPORTED_FUNCTION double window_get_showborder(void *window) {
+  #if defined(_WIN32)
+  HWND w = (HWND)window;
+  return (GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW &&
+  (GetWindowLongPtr(w, GWL_STYLE) & WS_POPUP) != WS_POPUP);
+  #else
+  Atom type;
+  int format;
+  unsigned long bytes;
+  unsigned long items;
+  unsigned char *data = NULL;
+  bool ret = true;
+  Display *d = XOpenDisplay(NULL);
+  Window w = (Window)(std::intptr_t)window;
+  Atom property = XInternAtom(d, "_MOTIF_WM_HINTS", False);
+  if (XGetWindowProperty(d, w, property, 0, LONG_MAX, False, AnyPropertyType, 
+  &type, &format, &items, &bytes, &data) == Success && data != nullptr) {
+    Hints *hints = (Hints *)data;
+    ret = hints->decorations;
+    XFree(data);
+  }
+  XCloseDisplay(d);
+  return ret;
+  #endif
+}
+
 EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) {
   #if defined(_WIN32)
   HWND w = (HWND)window;
   RECT rc, rw;
   GetClientRect(w, &rc);
   GetWindowRect(w, &rw);
-  if (!showborder && (GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW) &&
+  if (!showborder && window_get_showborder(window) == true &&
+    (GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW) &&
     (GetWindowLongPtr(w, GWL_STYLE) & WS_POPUP) != WS_POPUP) {
     if (dwid.find(w) != dwid.end() && dhgt.find(w) != dhgt.end() && fxd.find(w) != fxd.end()) {
       dwid.insert(std::make_pair(w, (rw.right - rw.left) - rc.right));
@@ -55,13 +90,14 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
       dwid[w] = (rw.right - rw.left) - rc.right;
       dhgt[w] = (rw.bottom - rw.top) - rc.bottom;
       fxd[w]  = ((GetWindowLongPtr(w, GWL_STYLE) & WS_SIZEBOX) != WS_SIZEBOX);
-      mxm[w]  = ((GetWindowLongPtr(w, GWL_STYLE) & WS_MAXIMIZEBOX) != WS_MAXIMIZEBOX);
+      nmx[w]  = ((GetWindowLongPtr(w, GWL_STYLE) & WS_MAXIMIZEBOX) != WS_MAXIMIZEBOX);
     }
     if (!IsZoomed(w)) {
       MoveWindow(w, rw.left, rw.top, rc.right, rc.bottom, true);
     }
     SetWindowLongPtr(w, GWL_STYLE, (GetWindowLongPtr(w, GWL_STYLE) | WS_POPUP) & ~WS_OVERLAPPEDWINDOW);
-  } else if ((GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW) != WS_OVERLAPPEDWINDOW &&
+  } else if (window_get_showborder(window) == false &&
+    (GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW) != WS_OVERLAPPEDWINDOW &&
     (GetWindowLongPtr(w, GWL_STYLE) & WS_POPUP)) {
     SetWindowLongPtr(w, GWL_STYLE, (GetWindowLongPtr(w, GWL_STYLE) | WS_OVERLAPPEDWINDOW) & ~WS_POPUP);
     if (fxd[w]) {
@@ -69,7 +105,7 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
     } else {
       SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) | WS_SIZEBOX);
     }
-    if (mxm[w]) {
+    if (nmx[w]) {
       SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) & ~WS_MAXIMIZEBOX);
     } else {
       SetWindowLongPtr(w, GWL_STYLE, GetWindowLongPtr(w, GWL_STYLE) | WS_MAXIMIZEBOX);
@@ -77,13 +113,6 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
     MoveWindow(w, rw.left, rw.top, (rw.right - rw.left) + dwid[w], (rw.bottom - rw.top) + dhgt[w], true);
   }
   #else
-  typedef struct {
-    unsigned long flags;
-    unsigned long functions;
-    unsigned long decorations;
-    long inputMode;
-    unsigned long status;
-  } Hints;
   Display *d = XOpenDisplay(nullptr);
   Window w = (Window)(std::intptr_t)window;
   Hints hints;
