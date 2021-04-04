@@ -113,7 +113,7 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
     MoveWindow(w, rw.left, rw.top, (rw.right - rw.left) + dwid[w], (rw.bottom - rw.top) + dhgt[w], true);
   }
   #else
-  if (window_get_showborder(window) == showborder) {
+  if (window_get_showborder(window) == (bool)showborder) {
     return 0;
   }
   Display *d = XOpenDisplay(nullptr);
