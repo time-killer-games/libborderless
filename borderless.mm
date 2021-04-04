@@ -45,15 +45,17 @@ EXPORTED_FUNCTION double window_get_showborder(void *window) {
 
 EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) {
   NSWindow *w = (NSWindow *)window;
-  if (!showborder) {
+  if (!showborder && window_get_showborder(window)) {
     if (style.find(w) != style.end()) {
       style.insert(std::make_pair(w, [w styleMask]));
     } else {
       style[w] = [w styleMask];
     }
     [w setStyleMask:NSWindowStyleMaskBorderless];
-  } else {
+    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+  } else if (!window_get_showborder(window)) {
     [w setStyleMask:style[w] & ~NSWindowStyleMaskBorderless];
+    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
   }
   return 0;
 }
