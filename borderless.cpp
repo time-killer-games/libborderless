@@ -64,7 +64,7 @@ EXPORTED_FUNCTION double window_get_showborder(void *window) {
   if (XGetWindowProperty(d, w, property, 0, LONG_MAX, false, AnyPropertyType, 
   &type, &format, &items, &bytes, &data) == Success && data != nullptr) {
     Hints *hints = (Hints *)data;
-    ret = hints->decorations;
+    ret = (bool)hints->decorations;
     XFree(data);
   }
   XCloseDisplay(d);
@@ -113,6 +113,9 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
     MoveWindow(w, rw.left, rw.top, (rw.right - rw.left) + dwid[w], (rw.bottom - rw.top) + dhgt[w], true);
   }
   #else
+  if (window_get_showborder(window) == showborder) {
+    return 0;
+  }
   Display *d = XOpenDisplay(nullptr);
   Window w = (Window)(std::intptr_t)window;
   Hints hints;
