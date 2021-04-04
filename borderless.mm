@@ -25,9 +25,10 @@
 
 */
 
-#include <string>
+#include <map>
 #include <Cocoa/Cocoa.h>
 #define EXPORTED_FUNCTION extern "C" __attribute__((visibility("default")))
+std::map<NSWindow *, NSWindowStyleMask> style;
 @interface NSWindow(subclass)
 -(BOOL)canBecomeKeyWindow;
 -(BOOL)canBecomeMainWindow;
@@ -36,12 +37,17 @@
 -(BOOL)canBecomeKeyWindow{return YES;}
 -(BOOL)canBecomeMainWindow{return YES;}
 @end
-EXPORTED_FUNCTION double borderless(void *window, double showborder) {
+EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) {
   NSWindow *w = (NSWindow *)window;
   if (!showborder) {
-    [w setStyleMask:[w styleMask] | NSWindowStyleMaskBorderless];
+    if (style.find(w) != style.end()) {
+      style.insert(std::make_pair(w, [w styleMask]));
+    } else {
+      style[w] = [w styleMask];
+    }
+    [w setStyleMask:NSWindowStyleMaskBorderless];
   } else {
-    [w setStyleMask:[w styleMask] & ~NSWindowStyleMaskBorderless];
+    [w setStyleMask:style[w] & ~NSWindowStyleMaskBorderless];
   }
   return 0;
 }
