@@ -40,7 +40,7 @@ std::map<NSWindow *, NSWindowStyleMask> style;
 
 EXPORTED_FUNCTION double window_get_showborder(void *window) {
   NSWindow *w = (NSWindow *)window;
-  return ([w styleMask] & NSWindowStyleMaskBorderless != NSWindowStyleMaskBorderless);
+  return (([w styleMask] & NSWindowStyleMaskBorderless) != NSWindowStyleMaskBorderless);
 }
 
 EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) {
