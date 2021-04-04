@@ -26,6 +26,8 @@
 */
 
 #include <map>
+#include <unistd.h>
+#include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 #define EXPORTED_FUNCTION extern "C" __attribute__((visibility("default")))
 std::map<NSWindow *, NSWindowStyleMask> style;
@@ -38,9 +40,16 @@ std::map<NSWindow *, NSWindowStyleMask> style;
 -(BOOL)canBecomeMainWindow{return YES;}
 @end
 
+static void simulate_click_in_window(NSWindow *w) {
+  NSEvent *event = [NSEvent mouseEventWithType:NSEventTypeLeftMouseDown location:
+  NSMakePoint(w.frame.size.width / 2, w.frame.size.height / 2) modifierFlags:0 timestamp:0 
+  windowNumber:[w windowNumber] context:nil eventNumber:0 clickCount:1 pressure:1.0]; 
+  [w sendEvent:event];
+} 
+
 EXPORTED_FUNCTION double window_get_showborder(void *window) {
   NSWindow *w = (NSWindow *)window;
-  return (([w styleMask] & NSWindowStyleMaskBorderless) != NSWindowStyleMaskBorderless);
+  return ([w styleMask] != NSWindowStyleMaskBorderless);
 }
 
 EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) {
@@ -52,10 +61,10 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
       style[w] = [w styleMask];
     }
     [w setStyleMask:NSWindowStyleMaskBorderless];
-    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    simulate_click_in_window(w);
   } else if (!window_get_showborder(window)) {
     [w setStyleMask:style[w] & ~NSWindowStyleMaskBorderless];
-    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    simulate_click_in_window(w);
   }
   return 0;
 }
