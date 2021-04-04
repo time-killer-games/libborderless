@@ -35,6 +35,7 @@ std::map<HWND, bool> fxd;
 std::map<HWND, bool> nmx;
 #else
 #include <cstdint>
+#include <climits>
 #include <X11/Xlib.h>
 #define EXPORTED_FUNCTION extern "C" __attribute__((visibility("default")))
 typedef struct {
