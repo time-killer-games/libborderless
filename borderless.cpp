@@ -54,10 +54,10 @@ EXPORTED_FUNCTION double window_get_showborder(void *window) {
   #else
   Atom type;
   int format;
+  bool ret = true;
   unsigned long bytes;
   unsigned long items;
   unsigned char *data = nullptr;
-  bool ret = true;
   Display *d = XOpenDisplay(nullptr);
   Window w = (Window)(std::intptr_t)window;
   Atom property = XInternAtom(d, "_MOTIF_WM_HINTS", false);
