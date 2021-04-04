@@ -78,7 +78,7 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
   RECT rc, rw;
   GetClientRect(w, &rc);
   GetWindowRect(w, &rw);
-  if (!showborder && window_get_showborder(window) == true &&
+  if (!showborder && window_get_showborder(window) &&
     (GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW) &&
     (GetWindowLongPtr(w, GWL_STYLE) & WS_POPUP) != WS_POPUP) {
     if (dwid.find(w) != dwid.end() && dhgt.find(w) != dhgt.end() && fxd.find(w) != fxd.end()) {
@@ -96,7 +96,7 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
       MoveWindow(w, rw.left, rw.top, rc.right, rc.bottom, true);
     }
     SetWindowLongPtr(w, GWL_STYLE, (GetWindowLongPtr(w, GWL_STYLE) | WS_POPUP) & ~WS_OVERLAPPEDWINDOW);
-  } else if (window_get_showborder(window) == false &&
+  } else if (!window_get_showborder(window) &&
     (GetWindowLongPtr(w, GWL_STYLE) & WS_OVERLAPPEDWINDOW) != WS_OVERLAPPEDWINDOW &&
     (GetWindowLongPtr(w, GWL_STYLE) & WS_POPUP)) {
     SetWindowLongPtr(w, GWL_STYLE, (GetWindowLongPtr(w, GWL_STYLE) | WS_OVERLAPPEDWINDOW) & ~WS_POPUP);
@@ -118,7 +118,7 @@ EXPORTED_FUNCTION double window_set_showborder(void *window, double showborder) 
   Hints hints;
   Atom property = XInternAtom(d, "_MOTIF_WM_HINTS", false);
   hints.flags = 2;
-  hints.decorations = (unsigned long)showborder;
+  hints.decorations = (bool)showborder;
   XChangeProperty(d, w, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
   XCloseDisplay(d);
   #endif
