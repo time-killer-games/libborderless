@@ -26,8 +26,6 @@
 */
 
 #include <map>
-#include <unistd.h>
-#include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 #define EXPORTED_FUNCTION extern "C" __attribute__((visibility("default")))
 std::map<NSWindow *, NSWindowStyleMask> style;
