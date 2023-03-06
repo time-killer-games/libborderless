@@ -61,9 +61,9 @@ EXPORTED_FUNCTION double window_set_stayontop(void *window, double stayontop) {
   HWND w = (HWND)window;
   BOOL result = SetWindowPos(w, (((BOOL)stayontop) ? HWND_TOPMOST : HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
   if (sty.find(w) != sty.end()) {
-    sty.insert(std::make_pair(w, (BOOL)stayontop));
+    sty.insert(std::make_pair(w, (bool)stayontop));
   } else {
-    sty[w] = (BOOL)stayontop;
+    sty[w] = (bool)stayontop;
   }
   return (double)result;
 }
