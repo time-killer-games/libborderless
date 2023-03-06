@@ -33,6 +33,7 @@ std::map<HWND, int> dwid;
 std::map<HWND, int> dhgt;
 std::map<HWND, bool> fxd;
 std::map<HWND, bool> nmx;
+std::map<HWND, bool> sty;
 #else
 #include <cstdint>
 #include <climits>
@@ -45,6 +46,27 @@ typedef struct {
   long inputMode;
   unsigned long status;
 } Hints;
+#endif
+
+#if defined(_WIN32)
+EXPORTED_FUNCTION double window_set_stayontop(void *window) {
+  HWND w = (HWND)window;
+  if (sty.find(w) != sty.end()) {
+    return (double)sty[w];
+  }
+  return 0;
+}
+
+EXPORTED_FUNCTION double window_set_stayontop(void *window, double stayontop) {
+  HWND w = (HWND)window;
+  BOOL result = SetWindowPos(w, (((BOOL)stayontop) ? HWND_TOPMOST : HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+  if (sty.find(w) != sty.end()) {
+    sty.insert(std::make_pair(w, (BOOL)stayontop));
+  } else {
+    sty[w] = (BOOL)stayontop;
+  }
+  return (double)result;
+}
 #endif
 
 EXPORTED_FUNCTION double window_get_showborder(void *window) {
