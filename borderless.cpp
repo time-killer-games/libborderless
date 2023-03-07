@@ -49,7 +49,7 @@ typedef struct {
 #endif
 
 #if defined(_WIN32)
-EXPORTED_FUNCTION double window_set_stayontop(void *window) {
+EXPORTED_FUNCTION double window_get_stayontop(void *window) {
   HWND w = (HWND)window;
   if (sty.find(w) != sty.end()) {
     return (double)sty[w];
